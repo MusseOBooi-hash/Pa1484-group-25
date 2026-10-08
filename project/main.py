@@ -8,6 +8,7 @@ from board_lvgl import start_board
 from debug_log import log
 
 from secrets import WIFI_SSID, WIFI_PASSWORD
+from demo_data import demo_departure
 
 
 class Application:
@@ -53,7 +54,22 @@ class Application:
         self.tile2_label.set_style_text_font(lv.font_montserrat_28, 0)
         self.tile2_label.align(lv.ALIGN.TOP_MID, 0, 10)
         self.apply_tile_colors(self.tile2, self.tile2_label, False)
-        
+
+        self.departure_table = lv.table(self.tile2)
+        self.departure_table.set_column_count(4)
+        self.departure_table.set_cell_value(0, 0, "Time")
+        self.departure_table.set_cell_value(0, 1, "Line")
+        self.departure_table.set_cell_value(0, 2, "Destination")
+        self.departure_table.set_cell_value(0, 3, "Status")
+        self.departure_table.align(lv.ALIGN.TOP_MID, 0, 60)
+
+        row = 1
+        for departure in demo_departure:
+            self.departure_table.set_cell_value(row, 0, departure["Time"])
+            self.departure_table.set_cell_value(row, 1, departure["Line"])
+            self.departure_table.set_cell_value(row, 2, departure["Destination"])
+            self.departure_table.set_cell_value(row, 3, departure["Status"])
+            row = row + 1
 
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
