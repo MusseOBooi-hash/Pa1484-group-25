@@ -59,7 +59,7 @@ class Application:
         )
 
         self.tile3_label = lv.label(self.tile3)
-        self.tile3_label.set_text("Installningar")
+        self.tile3_label.set_text("Settings")
         self.tile3_label.set_style_text_font(lv.font_montserrat_28, 0)
         self.tile3_label.center()
         self.apply_tile_colors(self.tile3, self.tile3_label, False)
