@@ -49,14 +49,11 @@ class Application:
         self.apply_tile_colors(self.tile1, self.tile1_label, False)
 
         self.tile2_label = lv.label(self.tile2)
-        self.tile2_label.set_text("Welcome to the workshop")
+        self.tile2_label.set_text("Departures")
         self.tile2_label.set_style_text_font(lv.font_montserrat_28, 0)
-        self.tile2_label.center()
+        self.tile2_label.align(lv.ALIGN.TOP_MID, 0, 10)
         self.apply_tile_colors(self.tile2, self.tile2_label, False)
-        self.tile2.add_flag(lv.obj.FLAG.CLICKABLE)
-        self.tile2.add_event_cb(
-            self.on_tile2_clicked, lv.EVENT.CLICKED, None
-        )
+        
 
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
