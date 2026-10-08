@@ -39,7 +39,8 @@ class Application:
         self.tileview.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
 
         self.tile1 = self.tileview.add_tile(0, 0, lv.DIR.RIGHT)
-        self.tile2 = self.tileview.add_tile(1, 0, lv.DIR.LEFT)
+        self.tile2 = self.tileview.add_tile(1, 0, lv.DIR.LEFT | lv.DIR.RIGHT)
+        self.tile3 = self.tileview.add_tile(2, 0, lv.DIR.LEFT)
 
         self.tile1_label = lv.label(self.tile1)
         self.tile1_label.set_text("Pa1484-group-25")
@@ -56,6 +57,12 @@ class Application:
         self.tile2.add_event_cb(
             self.on_tile2_clicked, lv.EVENT.CLICKED, None
         )
+
+        self.tile3_label = lv.label(self.tile3)
+        self.tile3_label.set_text("Installningar")
+        self.tile3_label.set_style_text_font(lv.font_montserrat_28, 0)
+        self.tile3_label.center()
+        self.apply_tile_colors(self.tile3, self.tile3_label, False)
 
     @staticmethod
     def connect_wifi():
