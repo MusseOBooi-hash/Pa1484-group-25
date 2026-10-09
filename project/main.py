@@ -74,8 +74,17 @@ class Application:
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
         self.tile3_label.set_style_text_font(lv.font_montserrat_28, 0)
-        self.tile3_label.center()
+        self.tile3_label.align(lv.ALIGN.TOP_MID, 0, 10)
         self.apply_tile_colors(self.tile3, self.tile3_label, False)
+
+        self.transport_label = lv.label(self.tile3)
+        self.transport_label.set_text("Transport type")
+        self.transport_label.align(lv.ALIGN.TOP_LEFT, 20, 70)
+
+        self.transport_dropdown = lv.dropdown(self.tile3)
+        self.transport_dropdown.set_options("All\nBus\nTrain\nFerry")
+        self.transport_dropdown.set_width(200)
+        self.transport_dropdown.align(lv.ALIGN.TOP_LEFT, 20, 100)
 
     @staticmethod
     def connect_wifi():
