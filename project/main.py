@@ -8,13 +8,14 @@ from board_lvgl import start_board
 from debug_log import log
 
 from secrets import WIFI_SSID, WIFI_PASSWORD
-from demo_data import demo_departure
+from demo_data import demo_departure, Stops
 
 
 class Application:
     def __init__(self):
         self.display, self.touch, self.handler = start_board()
         self.tile2_dark = False
+        self.selected_stop = Stops[0]
         self.create_ui()
         self.connect_wifi()
         log("student application ready")
@@ -38,18 +39,28 @@ class Application:
         self.departure_table.set_row_count(1)
         row = 1
         for departure in demo_departure:
-            if transport_type == "All" or departure["Type"] == transport_type:
-                self.departure_table.set_cell_value(row, 0, departure["Time"])
-                self.departure_table.set_cell_value(row, 1, departure["Line"])
-                self.departure_table.set_cell_value(row, 2, departure["Destination"])
-                self.departure_table.set_cell_value(row, 3, departure["Status"])
-                row = row + 1
+            if departure["Stop"] == self.selected_stop:
+                if transport_type == "All" or departure["Type"] == transport_type:
+                    self.departure_table.set_cell_value(row, 0, departure["Time"])
+                    self.departure_table.set_cell_value(row, 1, departure["Line"])
+                    self.departure_table.set_cell_value(row, 2, departure["Destination"])
+                    self.departure_table.set_cell_value(row, 3, departure["Status"])
+                    row = row + 1
 
     def on_transport_changed(self, _event):
         'Function: Updates the table when a transport type is selected'
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
         self.show_departures(options[selected])
+        self.tile2.label.set_text(self.selected_stop)
+
+    def on_stop_changed(self, _event):
+        'Funtion: Updates the table when a transport type is selected'
+        self.selected_stop = Stops[self.stop_dropdown.get_selected()]
+        options = ["All", "Bus", "Train", "Ferry"]
+        selected = self.transport_dropdown.get_selected()
+        self.show_departures(options[selected])
+        self.tile2_label.set_text(self.selected_stop)
 
     def create_ui(self):
         'Function: Creates UI'
@@ -104,6 +115,19 @@ class Application:
         self.transport_dropdown.align(lv.ALIGN.TOP_LEFT, 20, 100)
         self.transport_dropdown.add_event_cb(
             self.on_transport_changed, lv.EVENT.VALUE_CHANGED, None
+        )
+
+        self.stop_label = lv.label(self.tile3)
+        self.stop_label.set_text("Stop")
+        self.stop_label.set_style_text_color(lv.color_hex(0x000000), 0)
+        self.stop_label.align(lv.ALIGN.TOP_LEFT, 20, 160)
+
+        self.stop_dropdown = lv.dropdown(self.tile3)
+        self.stop_dropdown.set_options("\n".join(Stops))
+        self.stop_dropdown.set_width(200)
+        self.stop_dropdown.align(lv.ALIGN.TOP_LEFT, 20, 190)
+        self.stop_dropdown.add_event_cb(
+            self.on_stop_changed, lv.EVENT.VALUE_CHANGED, None
         )
 
     @staticmethod
