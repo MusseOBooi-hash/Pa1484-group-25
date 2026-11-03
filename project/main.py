@@ -9,6 +9,7 @@ from debug_log import log
 
 from secrets import WIFI_SSID, WIFI_PASSWORD
 from demo_data import demo_departure
+from settings_store import load_settings, save_settings
 
 
 class Application:
@@ -50,6 +51,12 @@ class Application:
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
         self.show_departures(options[selected])
+
+    def on_save_clicked(self, _event):
+        'Function: Saves the current settings as default'
+        options = ["All", "Bus", "Train", "Ferry"]
+        selected = self.transport_dropdown.get_selected()
+        save_settings({"transport_type": options[selected]})
 
     def create_ui(self):
         'Function: Creates UI'
@@ -105,6 +112,21 @@ class Application:
         self.transport_dropdown.add_event_cb(
             self.on_transport_changed, lv.EVENT.VALUE_CHANGED, None
         )
+
+        self.save_button = lv.button(self.tile3)
+        self.save_button.align(lv.ALIGN.BOTTOM_LEFT, 20, -20)
+        self.save_label = lv.label(self.save_button)
+        self.save_label.set_text("Save as default")
+        self.save_label.center()
+        self.save_button.add_event_cb(
+            self.on_save_clicked, lv.EVENT.CLICKED, None
+        )
+
+        settings = load_settings()
+        options = ["All", "Bus", "Train", "Ferry"]
+        saved_type = settings.get("transport_type", "All")
+        self.transport_dropdown.set_selected(options.index(saved_type))
+        self.show_departures(saved_type)
 
     @staticmethod
     def connect_wifi():
