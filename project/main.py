@@ -33,11 +33,29 @@ class Application:
         self.tile2_dark = not self.tile2_dark
         self.apply_tile_colors(self.tile2, self.tile2_label, self.tile2_dark)
 
+    def show_departures(self, transport_type):
+        'Function: Fills the departure table, filtered by transport type'
+        self.departure_table.set_row_count(1)
+        row = 1
+        for departure in demo_departure:
+            if transport_type == "All" or departure["Type"] == transport_type:
+                self.departure_table.set_cell_value(row, 0, departure["Time"])
+                self.departure_table.set_cell_value(row, 1, departure["Line"])
+                self.departure_table.set_cell_value(row, 2, departure["Destination"])
+                self.departure_table.set_cell_value(row, 3, departure["Status"])
+                row = row + 1
+
+    def on_transport_changed(self, _event):
+        'Function: Updates the table when a transport type is selected'
+        options = ["All", "Bus", "Train", "Ferry"]
+        selected = self.transport_dropdown.get_selected()
+        self.show_departures(options[selected])
+
     def create_ui(self):
         'Function: Creates UI'
         self.tileview = lv.tileview(lv.screen_active())
         self.tileview.set_size(600, 450)
-        self.tileview.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
+        self.tileview.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF) 
 
         self.tile1 = self.tileview.add_tile(0, 0, lv.DIR.RIGHT)
         self.tile2 = self.tileview.add_tile(1, 0, lv.DIR.LEFT | lv.DIR.RIGHT)
@@ -57,19 +75,17 @@ class Application:
 
         self.departure_table = lv.table(self.tile2)
         self.departure_table.set_column_count(4)
+        self.departure_table.set_column_width(0, 90)
+        self.departure_table.set_column_width(1, 80)
+        self.departure_table.set_column_width(2, 250)
+        self.departure_table.set_column_width(3, 150)
         self.departure_table.set_cell_value(0, 0, "Time")
         self.departure_table.set_cell_value(0, 1, "Line")
         self.departure_table.set_cell_value(0, 2, "Destination")
         self.departure_table.set_cell_value(0, 3, "Status")
         self.departure_table.align(lv.ALIGN.TOP_MID, 0, 60)
 
-        row = 1
-        for departure in demo_departure:
-            self.departure_table.set_cell_value(row, 0, departure["Time"])
-            self.departure_table.set_cell_value(row, 1, departure["Line"])
-            self.departure_table.set_cell_value(row, 2, departure["Destination"])
-            self.departure_table.set_cell_value(row, 3, departure["Status"])
-            row = row + 1
+        self.show_departures("All")
 
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
@@ -79,12 +95,16 @@ class Application:
 
         self.transport_label = lv.label(self.tile3)
         self.transport_label.set_text("Transport type")
+        self.transport_label.set_style_text_color(lv.color_hex(0x000000), 0)
         self.transport_label.align(lv.ALIGN.TOP_LEFT, 20, 70)
 
         self.transport_dropdown = lv.dropdown(self.tile3)
         self.transport_dropdown.set_options("All\nBus\nTrain\nFerry")
         self.transport_dropdown.set_width(200)
         self.transport_dropdown.align(lv.ALIGN.TOP_LEFT, 20, 100)
+        self.transport_dropdown.add_event_cb(
+            self.on_transport_changed, lv.EVENT.VALUE_CHANGED, None
+        )
 
     @staticmethod
     def connect_wifi():
