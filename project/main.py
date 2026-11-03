@@ -67,7 +67,7 @@ class Application:
         'Function: Saves the current settings as default'
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
-        save_settings({"transport_type": options[selected]})
+        save_settings({"transport_type": options[selected], "stop": self.selected_stop})
 
     def create_ui(self):
         'Function: Creates UI'
@@ -150,6 +150,11 @@ class Application:
         options = ["All", "Bus", "Train", "Ferry"]
         saved_type = settings.get("transport_type", "All")
         self.transport_dropdown.set_selected(options.index(saved_type))
+        saved_stop = settings.get("stop", Stops[0])
+        if saved_stop in Stops:
+            self.selected_stop = saved_stop
+            self.stop_dropdown.set_selected(Stops.index(saved_stop))
+            self.tile2_label.set_text(saved_stop)
         self.show_departures(saved_type)
 
     @staticmethod
