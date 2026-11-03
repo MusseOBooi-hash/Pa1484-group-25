@@ -69,6 +69,23 @@ class Application:
         selected = self.transport_dropdown.get_selected()
         save_settings({"transport_type": options[selected], "stop": self.selected_stop})
 
+    def apply_saved_settings(self):
+        'Function: Loads saved settings and updates dropdowns and table'
+        settings = load_settings()
+        options = ["All", "Bus", "Train", "Ferry"]
+        saved_type = settings.get("transport_type", "All")
+        self.transport_dropdown.set_selected(options.index(saved_type))
+        saved_stop = settings.get("stop", Stops[0])
+        if saved_stop in Stops:
+            self.selected_stop = saved_stop
+            self.stop_dropdown.set_selected(Stops.index(saved_stop))
+            self.tile2_label.set_text(saved_stop)
+        self.show_departures(saved_type)
+
+    def on_reset_clicked(self, _event):
+        'Function: Resets current settings to the saved defaults'
+        self.apply_saved_settings()
+
     def create_ui(self):
         'Function: Creates UI'
         self.tileview = lv.tileview(lv.screen_active())
@@ -146,16 +163,16 @@ class Application:
             self.on_save_clicked, lv.EVENT.CLICKED, None
         )
 
-        settings = load_settings()
-        options = ["All", "Bus", "Train", "Ferry"]
-        saved_type = settings.get("transport_type", "All")
-        self.transport_dropdown.set_selected(options.index(saved_type))
-        saved_stop = settings.get("stop", Stops[0])
-        if saved_stop in Stops:
-            self.selected_stop = saved_stop
-            self.stop_dropdown.set_selected(Stops.index(saved_stop))
-            self.tile2_label.set_text(saved_stop)
-        self.show_departures(saved_type)
+        self.reset_button = lv.button(self.tile3)
+        self.reset_button.align(lv.ALIGN.BOTTOM_RIGHT, -20, -20)
+        self.reset_label = lv.label(self.reset_button)
+        self.reset_label.set_text("Reset")
+        self.reset_label.center()
+        self.reset_button.add_event_cb(
+            self.on_reset_clicked, lv.EVENT.CLICKED, None
+        )
+
+        self.apply_saved_settings()
 
     @staticmethod
     def connect_wifi():
