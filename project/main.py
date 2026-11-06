@@ -11,8 +11,9 @@ from secrets import WIFI_SSID, WIFI_PASSWORD
 from demo_data import demo_departure, Stops
 from settings_store import load_settings, save_settings
 
-
+# The class runs the app
 class Application:
+    # The function starts the board, builds UI and connects to WIFI
     def __init__(self):
         self.display, self.touch, self.handler = start_board()
         self.tile2_dark = False
@@ -22,6 +23,7 @@ class Application:
         log("student application ready")
 
     @staticmethod
+    # The function sets the background and text color of a tile
     def apply_tile_colors(tile, label, dark):
         tile.set_style_bg_opa(lv.OPA.COVER, 0)
         tile.set_style_bg_color(
@@ -31,12 +33,13 @@ class Application:
             lv.color_hex(0xFFFFFF if dark else 0x000000), 0
         )
 
+    # The function switches tile 2 between light and dark mode
     def on_tile2_clicked(self, _event):
         self.tile2_dark = not self.tile2_dark
         self.apply_tile_colors(self.tile2, self.tile2_label, self.tile2_dark)
 
+    # The function fills the departure table and is filtered by transport type
     def show_departures(self, transport_type):
-        'Function: Fills the departure table, filtered by transport type'
         self.departure_table.set_row_count(1)
         row = 1
         for departure in demo_departure:
@@ -48,29 +51,29 @@ class Application:
                     self.departure_table.set_cell_value(row, 3, departure["Status"])
                     row = row + 1
 
+    # The function updates the table when a transport type is selected
     def on_transport_changed(self, _event):
-        'Function: Updates the table when a transport type is selected'
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
         self.show_departures(options[selected])
         self.tile2_label.set_text(self.selected_stop)
 
+    # The function updates the table when a stop is selected
     def on_stop_changed(self, _event):
-        'Function: Updates the table when a stop is selected'
         self.selected_stop = Stops[self.stop_dropdown.get_selected()]
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
         self.show_departures(options[selected])
         self.tile2_label.set_text(self.selected_stop)
 
+    # The funktion saves the currents settings as default setting
     def on_save_clicked(self, _event):
-        'Function: Saves the current settings as default'
         options = ["All", "Bus", "Train", "Ferry"]
         selected = self.transport_dropdown.get_selected()
         save_settings({"transport_type": options[selected], "stop": self.selected_stop})
 
+    # The function loades the saved settings and updates the dropdowns and the table
     def apply_saved_settings(self):
-        'Function: Loads saved settings and updates dropdowns and table'
         settings = load_settings()
         options = ["All", "Bus", "Train", "Ferry"]
         saved_type = settings.get("transport_type", "All")
@@ -82,12 +85,12 @@ class Application:
             self.tile2_label.set_text(saved_stop)
         self.show_departures(saved_type)
 
+    # The function resets the currents settings to the saved default setting
     def on_reset_clicked(self, _event):
-        'Function: Resets current settings to the saved defaults'
         self.apply_saved_settings()
 
+    # The funktions creates UI
     def create_ui(self):
-        'Function: Creates UI'
         self.tileview = lv.tileview(lv.screen_active())
         self.tileview.set_size(600, 450)
         self.tileview.set_scrollbar_mode(lv.SCROLLBAR_MODE.OFF)
@@ -175,6 +178,7 @@ class Application:
         self.apply_saved_settings()
 
     @staticmethod
+    # The function connects to WIFI
     def connect_wifi():
         'Function: Connects to WiFi'
         log("connecting to Wi-Fi SSID: " + WIFI_SSID)
