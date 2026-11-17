@@ -184,6 +184,9 @@ class Application:
             self.on_refresh_clicked, lv.EVENT.CLICKED, None
         )
 
+        # Automatic refresh every 60 seconds (US4.1)
+        self.refresh_timer = lv.timer_create(self.on_auto_refresh, 60000, None)
+
         # Settings screen (US3)
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
@@ -244,6 +247,10 @@ class Application:
 
     # The function refreshes the departures when the button is pressed
     def on_refresh_clicked(self, _event):
+        self.refresh_departures()
+
+    # The function is called by the timer every 60 seconds (US4.1)
+    def on_auto_refresh(self, _timer):
         self.refresh_departures()
 
     # The function connects to WIFI
