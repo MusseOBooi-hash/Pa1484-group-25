@@ -238,6 +238,18 @@ class Application:
             self.on_reset_clicked, lv.EVENT.CLICKED, None
         )
 
+        # Wi-Fi and live data status (US4.3)
+        self.wifi_status_label = lv.label(self.tile3)
+        self.wifi_status_label.set_style_text_color(lv.color_hex(0x000000), 0)
+        self.wifi_status_label.align(lv.ALIGN.TOP_LEFT, 320, 70)
+
+        self.data_status_label = lv.label(self.tile3)
+        self.data_status_label.set_style_text_color(lv.color_hex(0x000000), 0)
+        self.data_status_label.align(lv.ALIGN.TOP_LEFT, 320, 100)
+
+        self.update_status()
+        self.status_timer = lv.timer_create(self.update_status, 2000, None)
+
         # Load saved settings and fill the departure table (US3.4)
         self.apply_saved_settings()
 
@@ -252,6 +264,20 @@ class Application:
     # The function is called by the timer every 60 seconds (US4.1)
     def on_auto_refresh(self, _timer):
         self.refresh_departures()
+
+    # The function shows the Wi-Fi and live data status on the settings screen (US4.3)
+    def update_status(self, _timer=None):
+        if network.WLAN(network.STA_IF).isconnected():
+            self.wifi_status_label.set_text("Wi-Fi: Connected")
+        else:
+            self.wifi_status_label.set_text("Wi-Fi: Not connected")
+
+        if self.data_ok is None:
+            self.data_status_label.set_text("Live data: Loading...")
+        elif self.data_ok:
+            self.data_status_label.set_text("Live data: OK")
+        else:
+            self.data_status_label.set_text("Live data: Not available")
 
     # The function connects to WIFI
     @staticmethod
