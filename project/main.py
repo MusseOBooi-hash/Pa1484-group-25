@@ -174,6 +174,16 @@ class Application:
         self.attribution_label.set_style_text_color(lv.color_hex(0x555555), 0)
         self.attribution_label.align(lv.ALIGN.TOP_RIGHT, -10, 20)
 
+        # Manual refresh button (US4.2)
+        self.refresh_button = lv.button(self.tile2)
+        self.refresh_button.align(lv.ALIGN.TOP_LEFT, 10, 10)
+        self.refresh_label = lv.label(self.refresh_button)
+        self.refresh_label.set_text("Refresh")
+        self.refresh_label.center()
+        self.refresh_button.add_event_cb(
+            self.on_refresh_clicked, lv.EVENT.CLICKED, None
+        )
+
         # Settings screen (US3)
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
@@ -227,6 +237,14 @@ class Application:
 
         # Load saved settings and fill the departure table (US3.4)
         self.apply_saved_settings()
+
+    # The function reloads the departures with the current settings (US4.2)
+    def refresh_departures(self):
+        return self.show_departures(self.get_selected_transport())
+
+    # The function refreshes the departures when the button is pressed
+    def on_refresh_clicked(self, _event):
+        self.refresh_departures()
 
     # The function connects to WIFI
     @staticmethod
