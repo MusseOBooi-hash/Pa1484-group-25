@@ -8,10 +8,11 @@ from secrets import TRAFIKLAB_KEY
 API_URL = "https://realtime-api.trafiklab.se/v1/departures/{}?key={}"
 
 # Stops the user can choose between (name shown in the dropdown, Trafiklab id)
-STOPS = [
+# Stops the user can choose between (name shown in the dropdown, Trafiklab id)
+STOPS =[
     {"name": "Karlskrona C", "id": "740098084"},
     {"name": "Campus Grasvik", "id": "740032188"},
-    {"name": "Karlskrona centrum", "id": "740023372"},
+    {"name": "Verko", "id": "740031840"},
     {"name": "Fisktorget", "id": "740020700"},
     {"name": "Bergasa station", "id": "740001537"},
     {"name": "Amiralen", "id": "740031800"},
