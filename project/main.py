@@ -168,6 +168,12 @@ class Application:
         self.departure_table.set_cell_value(0, 3, "Status")
         self.departure_table.align(lv.ALIGN.TOP_MID, 0, 60)
 
+        # Attribution required by Trafiklab's terms (NF3)
+        self.attribution_label = lv.label(self.tile2)
+        self.attribution_label.set_text("Data: Trafiklab.se")
+        self.attribution_label.set_style_text_color(lv.color_hex(0x555555), 0)
+        self.attribution_label.align(lv.ALIGN.TOP_RIGHT, -10, 20)
+
         # Settings screen (US3)
         self.tile3_label = lv.label(self.tile3)
         self.tile3_label.set_text("Settings")
