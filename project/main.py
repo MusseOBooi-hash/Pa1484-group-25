@@ -8,11 +8,17 @@ from board_lvgl import start_board
 from debug_log import log
 
 from secrets import WIFI_SSID, WIFI_PASSWORD
-from demo_data import demo_departure, Stops
+from trafiklab import STOPS, get_departures
 from settings_store import load_settings, save_settings
 
 # Transport types shown in the dropdown, in the same order
 TRANSPORT_OPTIONS = ["All", "Bus", "Train", "Ferry"]
+
+# Names of the stops, shown in the stop dropdown
+STOP_NAMES = [stop["name"] for stop in STOPS]
+
+# The most departures shown in the table at the same time
+MAX_ROWS = 8
 
 
 # The class runs the app
@@ -21,9 +27,11 @@ class Application:
     def __init__(self):
         self.display, self.touch, self.handler = start_board()
         self.tile2_dark = False
-        self.selected_stop = Stops[0]
+        self.selected_stop = STOP_NAMES[0]
+        self.data_ok = None
         self.create_ui()
         self.connect_wifi()
+        self.show_departures(self.get_selected_transport())
         log("student application ready")
 
     # The function sets the background and text color of a tile
@@ -42,18 +50,45 @@ class Application:
         self.tile2_dark = not self.tile2_dark
         self.apply_tile_colors(self.tile2, self.tile2_label, self.tile2_dark)
 
-    # The function fills the departure table and is filtered by transport type
+    # The function shows a message in the table instead of departures
+    def show_table_message(self, message):
+        self.departure_table.set_row_count(2)
+        self.departure_table.set_cell_value(1, 0, "")
+        self.departure_table.set_cell_value(1, 1, "")
+        self.departure_table.set_cell_value(1, 2, message)
+        self.departure_table.set_cell_value(1, 3, "")
+
+    # The function fills the departure table with live data (US1.2B),
+    # filtered by transport type. Returns True if the data was loaded.
     def show_departures(self, transport_type):
+        if not network.WLAN(network.STA_IF).isconnected():
+            self.show_table_message("Waiting for Wi-Fi...")
+            self.data_ok = False
+            return False
+
+        stop_id = STOPS[STOP_NAMES.index(self.selected_stop)]["id"]
+        departures = get_departures(stop_id)
+        if departures is None:
+            self.show_table_message("Could not load departures")
+            self.data_ok = False
+            return False
+
         self.departure_table.set_row_count(1)
         row = 1
-        for departure in demo_departure:
-            if departure["Stop"] == self.selected_stop:
-                if transport_type == "All" or departure["Type"] == transport_type:
-                    self.departure_table.set_cell_value(row, 0, departure["Time"])
-                    self.departure_table.set_cell_value(row, 1, departure["Line"])
-                    self.departure_table.set_cell_value(row, 2, departure["Destination"])
-                    self.departure_table.set_cell_value(row, 3, departure["Status"])
-                    row = row + 1
+        for departure in departures:
+            if row > MAX_ROWS:
+                break
+            if transport_type == "All" or departure["Type"] == transport_type:
+                self.departure_table.set_cell_value(row, 0, departure["Time"])
+                self.departure_table.set_cell_value(row, 1, departure["Line"])
+                self.departure_table.set_cell_value(row, 2, departure["Destination"])
+                self.departure_table.set_cell_value(row, 3, departure["Status"])
+                row = row + 1
+
+        if row == 1:
+            self.show_table_message("No departures right now")
+        self.data_ok = True
+        return True
 
     # The function returns the transport type selected in the dropdown
     def get_selected_transport(self):
@@ -66,7 +101,7 @@ class Application:
 
     # The function updates the table when a stop is selected
     def on_stop_changed(self, _event):
-        self.selected_stop = Stops[self.stop_dropdown.get_selected()]
+        self.selected_stop = STOP_NAMES[self.stop_dropdown.get_selected()]
         self.show_departures(self.get_selected_transport())
         self.tile2_label.set_text(self.selected_stop)
 
@@ -82,10 +117,10 @@ class Application:
         settings = load_settings()
         saved_type = settings.get("transport_type", "All")
         self.transport_dropdown.set_selected(TRANSPORT_OPTIONS.index(saved_type))
-        saved_stop = settings.get("stop", Stops[0])
-        if saved_stop in Stops:
+        saved_stop = settings.get("stop", STOP_NAMES[0])
+        if saved_stop in STOP_NAMES:
             self.selected_stop = saved_stop
-            self.stop_dropdown.set_selected(Stops.index(saved_stop))
+            self.stop_dropdown.set_selected(STOP_NAMES.index(saved_stop))
             self.tile2_label.set_text(saved_stop)
         self.show_departures(saved_type)
 
@@ -159,8 +194,8 @@ class Application:
         self.stop_label.align(lv.ALIGN.TOP_LEFT, 20, 160)
 
         self.stop_dropdown = lv.dropdown(self.tile3)
-        self.stop_dropdown.set_options("\n".join(Stops))
-        self.stop_dropdown.set_width(200)
+        self.stop_dropdown.set_options("\n".join(STOP_NAMES))
+        self.stop_dropdown.set_width(250)
         self.stop_dropdown.align(lv.ALIGN.TOP_LEFT, 20, 190)
         self.stop_dropdown.add_event_cb(
             self.on_stop_changed, lv.EVENT.VALUE_CHANGED, None
